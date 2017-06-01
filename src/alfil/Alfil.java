@@ -7,6 +7,8 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.Scanner;
 
+import javax.swing.table.TableStringConverter;
+
 public class Alfil {
 
 	private int dimension;
@@ -15,8 +17,11 @@ public class Alfil {
 	private int colInicial;
 	private int filDestino;
 	private int colDestino;
-	private String posible = "NO";
+	private String posible = "SI";
 	private int cantidadMovimientos = 0;
+	private int movimMenor = 100000;
+	private String orientacion;
+	private String orientacionAnt = "NN";
 
 	public Alfil(String path) {
 		try {
@@ -26,9 +31,68 @@ public class Alfil {
 			e.printStackTrace();
 		}
 	}
-	
-	public void calcula(){
-		
+
+	public void calcula() {
+		// primero pregunto si la posición inicial y la final están vinculadas
+		// según lógica del movimiento del alfil
+		if (((this.filInicial + this.colInicial) % 2 == 0) && ((this.filDestino + this.colDestino) % 2 == 0)
+				|| ((this.filInicial + this.colInicial) % 2 != 0) && ((this.filDestino + this.colDestino) % 2 != 0)) {
+			if (mover(this.filInicial - 1, this.colInicial - 1) == 0) {
+				this.posible = "NO";
+				this.movimMenor = 0;
+			}
+		}
+	}
+
+	public int mover(int fila, int columna) {
+		int suma = 0;
+		if (fila + 1 == filDestino && columna + 1 == colDestino) {
+			if (this.cantidadMovimientos < this.movimMenor)
+				this.movimMenor = this.cantidadMovimientos;
+			return 1;
+		}
+
+		if (fila <= this.dimension && columna <= this.dimension && !this.orientacionAnt.equals("SE")
+				&& this.tablero[fila + 1][columna + 1] == 0) {
+			this.orientacion = "SE";
+			if (!this.orientacion.equals(this.orientacionAnt)) {
+				this.cantidadMovimientos++;
+				this.orientacionAnt = this.orientacion;
+			}
+			suma += mover(fila, columna);
+		}
+
+		if (fila <= this.dimension && columna >= this.dimension && !this.orientacionAnt.equals("SO")
+				&& this.tablero[fila + 1][columna - 1] == 0) {
+			this.orientacion = "SO";
+			if (!this.orientacion.equals(this.orientacionAnt)) {
+				this.cantidadMovimientos++;
+				this.orientacionAnt = this.orientacion;
+			}
+			suma += mover(fila, columna);
+		}
+
+		if (fila >= this.dimension && columna >= this.dimension && !this.orientacionAnt.equals("NO")
+				&& this.tablero[fila - 1][columna - 1] == 0) {
+			this.orientacion = "NO";
+			if (!this.orientacion.equals(this.orientacionAnt)) {
+				this.cantidadMovimientos++;
+				this.orientacionAnt = this.orientacion;
+			}
+			suma += mover(fila, columna);
+		}
+
+		if (fila >= this.dimension && columna <= this.dimension && !this.orientacionAnt.equals("NE")
+				&& this.tablero[fila - 1][columna + 1] == 0) {
+			this.orientacion = "NE";
+			if (!this.orientacion.equals(this.orientacionAnt)) {
+				this.cantidadMovimientos++;
+				this.orientacionAnt = this.orientacion;
+			}
+			suma += mover(fila, columna);
+		}
+
+		return suma;
 	}
 
 	public void leerArchivo(String path) {
